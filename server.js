@@ -1,13 +1,32 @@
+// server.js
 const express = require('express');
-const app = express();
-const port = 3000;
+const { MongoClient } = require('mongodb');
+require('dotenv').config();
 
-// Define the /ping route
-app.get('/ping', (req, res) => {
-    res.send('pong');
+const app = express();
+const port = process.env.PORT || 3000;
+
+const client = new MongoClient(process.env.MONGO_URI);
+
+let dbStatus = 'Not Connected';
+
+async function connectDB() {
+  try {
+    await client.connect();
+    dbStatus = 'Connected to MongoDB';
+    console.log('✅ Database connected successfully');
+  } catch (error) {
+    dbStatus = 'Failed to connect to MongoDB';
+    console.error('❌ Database connection failed:', error.message);
+  }
+}
+connectDB();
+
+// Home route to show database connection status
+app.get('/', (req, res) => {
+  res.json({ status: dbStatus });
 });
 
-// Start the server
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+  console.log(`🚀 Server running on http://localhost:${port}`);
 });
